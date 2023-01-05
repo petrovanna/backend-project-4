@@ -11,7 +11,7 @@ program
   .option('-o, --output [dir]', 'output dir', currentDir)
   .argument('<url>')
   .action((url) => {
-    console.log(pageLoader(url, program.opts().output));
+    pageLoader(url, program.opts().output);
   });
 
 program.parse();
