@@ -1,9 +1,9 @@
 {
   "name": "@hexlet/code",
+  "type": "module",
   "version": "1.0.0",
   "description": "My third project",
-  "main": "index.js",
-  "type": "module",
+  "main": "./src/index.js",
   "bin": {
     "page-loader": "bin/page-loader.js"
   },
@@ -24,7 +24,9 @@
     "eslint": "^8.30.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "jest": "^29.3.1"
+    "jest": "^29.3.1",
+    "@jest/globals": "^29.3.1",
+    "nock": "^13.2.9"
   },
   "dependencies": {
     "axios": "^1.2.2",
