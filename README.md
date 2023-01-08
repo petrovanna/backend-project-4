@@ -6,3 +6,5 @@
 
 ### GitHub Actions:
 [![Linter/Tests](https://github.com/petrovanna/backend-project-4/workflows/Linter/Tests/badge.svg)](https://github.com/petrovanna/backend-project-4/actions/workflows/lint.yml)
+
+[![asciicast](https://asciinema.org/a/nzpKL7N6cLBFfIzEQcxeSBcuD.svg)](https://asciinema.org/a/nzpKL7N6cLBFfIzEQcxeSBcuD)
