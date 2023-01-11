@@ -2,6 +2,7 @@ import axios from 'axios';
 import fsp from 'fs/promises';
 import path from 'path';
 import cheerio from 'cheerio';
+import fs from 'fs';
 
 const getFileName = (url) => {
   const nameWithoutProtocol = url.split('://')[1];
@@ -16,6 +17,7 @@ const getImgLink = (html) => {
 
 const getImgName = (url) => {
   const nameWithoutProtocol = url.split('://')[1];
+  console.log(typeof nameWithoutProtocol);
   const ext = path.extname(nameWithoutProtocol);
   const nameWithoutExt = nameWithoutProtocol.split(ext)[0];
   const newName = nameWithoutExt.replace(/[^a-z0-9]/gm, '-');
@@ -33,7 +35,11 @@ const pageLoader = (url, dir = process.cwd()) => {
     .then(() => fsp.mkdir(fullDirPath))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
     .then((file) => getImgLink(file))
-    .then((imgUrl) => getImgName(imgUrl))
+    .then((imgUrl) => axios.get(imgUrl, {
+      responseType: 'stream',
+    }))
+    .then((imgResponse) => fsp.writeFile(path.join(fullDirPath, 'image-Name-With-tire.png'), imgResponse.data))
+    // .then((imgUrl) => getImgName(imgUrl))
     .then(() => console.log(fullHtmlPath));
 };
 export default pageLoader;
