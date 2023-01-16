@@ -12,6 +12,12 @@ const getFileName = (url2) => {
 
 const getImgLink = (html) => {
   const $ = cheerio.load(html);
+  const imgLinks = [];
+  $('img').each((_index, el) => imgLinks.push($(el).attr('src')));
+
+  console.log('1)', imgLinks); // $element.attr(attrName, filepath);
+  // console.log('2)', $('img').attr('src', 'NEWLIIIIIIIIIIIINK').html());
+  // console.log('3)', $('img').attr('src'));
   return $('img').attr('src'); // [class="img-fluid d-none d-lg-block"]
 };
 
@@ -45,21 +51,31 @@ const pageLoader = (url1, dir = process.cwd()) => {
     .then(() => fsp.access(fullDirPath))
     .catch(() => fsp.mkdir(fullDirPath))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
-    .then((file) => getImgLink(file))
+    .then((file) => getImgLink(file)) // получаю массив ссылок на картинки
     .then((url2) => {
       const myUrl2 = new URL(url2, base);
       imgUrl = myUrl2.href;
       // console.log('imgUrl', imgUrl); //
     })
-    .then(() => getImgName(imgUrl))
+    .then(() => getImgName(imgUrl)) // использую массив ссылок на картинки
     .then((newName) => {
       imgName = newName;
       // console.log('imgName', imgName); //
     })
-    .then(() => axios.get(imgUrl, {
+    .then(() => axios.get(imgUrl, { // делаю get запрос по каждой ссылке
       responseType: 'arraybuffer',
     }))
     .then((imgResponse) => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName}`), imgResponse.data))
+    .then(() => fsp.readFile('/var/tmp/ru-hexlet-io-courses.html', 'utf-8'))
+    .then((file) => {
+      const $ = cheerio.load(file);
+      // console.log($('img').attr('src'));
+      $('img').attr('src', path.join(dirName, hostName, imgName));
+      // console.log($('img').attr('src'));
+      const newFile = $.html();
+      // console.log(newFile);
+      return fsp.writeFile('/var/tmp/ru-hexlet-io-courses.html', newFile);
+    })
     .then(() => console.log(fullHtmlPath));
 };
 export default pageLoader;
