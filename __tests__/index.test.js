@@ -18,12 +18,12 @@ nock.disableNetConnect();
 
 let tmpDir;
 let beforeHTML;
-// let afterHtml;
+let afterHtml;
 let expectedImage;
 
 beforeAll(async () => {
   beforeHTML = await readFixture('before.html');
-  // afterHtml = await readFixture('after.html');
+  afterHtml = await readFixture('after.html');
   expectedImage = await readFixture('image.png');
 });
 
@@ -45,7 +45,7 @@ test('2) Should load page', async () => {
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
   const fileName = await fsp.readdir(tmpDir);
   const page = await fsp.readFile(join(tmpDir, fileName[0]), 'utf-8');
-  expect(page).toEqual(beforeHTML);
+  expect(page).toEqual(afterHtml);
 });
 
 test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
