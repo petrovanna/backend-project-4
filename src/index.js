@@ -10,25 +10,34 @@ const getFileName = (url2) => {
   return `${newName}.html`;
 };
 
-const getImgLink = (html) => {
+const getImgLink = (html, url3) => {
   const $ = cheerio.load(html);
   const imgLinks = [];
-  $('img').each((_index, el) => imgLinks.push($(el).attr('src')));
 
-  console.log('1)', imgLinks); // $element.attr(attrName, filepath);
-  // console.log('2)', $('img').attr('src', 'NEWLIIIIIIIIIIIINK').html());
-  // console.log('3)', $('img').attr('src'));
-  return $('img').attr('src'); // [class="img-fluid d-none d-lg-block"]
+  const originUrl = new URL(url3, url3);
+  const { origin } = originUrl;
+
+  $('img').each((_index, el) => {
+    const elem = $(el).attr('src');
+    const myUrl2 = new URL(elem, origin);
+    imgLinks.push(myUrl2.href);
+    return imgLinks;
+  });
+
+  return imgLinks;
 };
 
 const getImgName = (adress) => {
-  const myUrl = url.parse(adress);
-  // console.log(myUrl);
-  const ext = path.extname(myUrl.pathname);
-  const urlWithoutExt = myUrl.pathname.split(ext)[0];
-  const pathName = urlWithoutExt.replace(/[^a-z0-9]/gm, '-');
+  const result = adress.map((adr) => {
+    const parse = url.parse(adr);
+    const extn = path.extname(parse.pathname);
+    const urlWithout = parse.pathname.split(extn)[0];
+    const pathN = urlWithout.replace(/[^a-z0-9]/gm, '-');
 
-  return `${pathName}${ext}`;
+    return `${pathN}${extn}`;
+  });
+
+  return result;
 };
 
 const pageLoader = (url1, dir = process.cwd()) => {
@@ -38,12 +47,12 @@ const pageLoader = (url1, dir = process.cwd()) => {
   const fullDirPath = path.join(dir, dirName);
 
   const parseUrl = new URL(url1, url1);
-  const { origin, hostname } = parseUrl;
-  const base = origin;
+  const { hostname } = parseUrl;
   const hostName = hostname.replace(/[^a-z0-9]/gm, '-');
 
-  let imgUrl;
+  let imgUrls;
   let imgName;
+  let images;
   return axios.get(url1, {
     responseType: 'arraybuffer',
   })
@@ -51,30 +60,43 @@ const pageLoader = (url1, dir = process.cwd()) => {
     .then(() => fsp.access(fullDirPath))
     .catch(() => fsp.mkdir(fullDirPath))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
-    .then((file) => getImgLink(file)) // получаю массив ссылок на картинки
-    .then((url2) => {
-      const myUrl2 = new URL(url2, base);
-      imgUrl = myUrl2.href;
-      // console.log('imgUrl', imgUrl); //
+    .then((file) => getImgLink(file, url1))
+    .then((imgData) => {
+      imgUrls = imgData;
+      // console.log('imgUrl', imgUrls); //
     })
-    .then(() => getImgName(imgUrl)) // использую массив ссылок на картинки
+    .then(() => getImgName(imgUrls))
     .then((newName) => {
       imgName = newName;
       // console.log('imgName', imgName); //
     })
-    .then(() => axios.get(imgUrl, { // делаю get запрос по каждой ссылке
-      responseType: 'arraybuffer',
-    }))
-    .then((imgResponse) => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName}`), imgResponse.data))
-    .then(() => fsp.readFile('/var/tmp/ru-hexlet-io-courses.html', 'utf-8'))
+    .then(() => {
+      const promises = imgUrls.map((imgUrl) => axios.get(imgUrl, {
+        responseType: 'arraybuffer',
+      }));
+      return Promise.all(promises);
+    })
+    .then((imgResponse) => imgResponse.map((resp) => resp.data))
+    .then((content) => {
+      images = content;
+    })
+    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[0]}`), images[0]))
+    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[1]}`), images[1]))
+    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[2]}`), images[2]))
+    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[3]}`), images[3]))
+    .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
     .then((file) => {
       const $ = cheerio.load(file);
-      // console.log($('img').attr('src'));
-      $('img').attr('src', path.join(dirName, hostName, imgName));
-      // console.log($('img').attr('src'));
+      $('img').each((_index, el) => {
+        const names = [];
+        let i = 0;
+        const elem = $(el).attr('src', path.join(dirName, hostName, imgName[i]));
+        names.push(elem);
+        i += 1;
+        return names;
+      });
       const newFile = $.html();
-      // console.log(newFile);
-      return fsp.writeFile('/var/tmp/ru-hexlet-io-courses.html', newFile);
+      return fsp.writeFile(fullHtmlPath, newFile);
     })
     .then(() => console.log(fullHtmlPath));
 };
