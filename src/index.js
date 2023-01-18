@@ -2,7 +2,7 @@ import axios from 'axios';
 import fsp from 'fs/promises';
 import path from 'path';
 import cheerio from 'cheerio';
-import url from 'node:url';
+// import url from 'node:url';
 
 const getFileName = (url2) => {
   const nameWithoutProtocol = url2.split('://')[1];
@@ -10,9 +10,9 @@ const getFileName = (url2) => {
   return `${newName}.html`;
 };
 
-const getImgLink = (html, url3) => {
+const downloadResources = (html, url3, dirPath) => {
   const $ = cheerio.load(html);
-  const imgLinks = [];
+  const names = [];
 
   const originUrl = new URL(url3, url3);
   const { origin } = originUrl;
@@ -20,25 +20,32 @@ const getImgLink = (html, url3) => {
   $('img').each((_index, el) => {
     const elem = $(el).attr('src');
     const myUrl2 = new URL(elem, origin);
-    imgLinks.push(myUrl2.href);
-    return imgLinks;
-  });
+    const { href, pathname, hostname } = myUrl2;
 
-  return imgLinks;
+    const extension = path.extname(pathname);
+    const urlWithoutExt = pathname.split(extension)[0];
+    const newName = `${urlWithoutExt.replace(/[^a-z0-9]/gm, '-')}${extension}`;
+
+    // console.log(path.join(dirPath, `${hostname}${newName}`));
+    names.push(newName);
+    return axios.get(href, { responseType: 'arraybuffer' })
+      .then((response) => fsp.writeFile(path.join(dirPath, `${hostname}${newName}`), response.data));
+  });
+  return names;
 };
 
-const getImgName = (adress) => {
-  const result = adress.map((adr) => {
-    const parse = url.parse(adr);
-    const extn = path.extname(parse.pathname);
-    const urlWithout = parse.pathname.split(extn)[0];
-    const pathN = urlWithout.replace(/[^a-z0-9]/gm, '-');
+/* const changeLinks = (file, imageNames, dirName, hostName) => {
+  const $ = cheerio.load(file);
+  $('img').each((_index, el) => () => {
+    const names = [];
+    const elem = $(el).attr('src', path.join(dirName, `${hostName}${imageNames}`));
+    names.push(elem);
 
-    return `${pathN}${extn}`;
+    return names;
   });
-
-  return result;
-};
+  const newFile = $.html();
+  return fsp.writeFile(fullHtmlPath, newFile);
+}; */
 
 const pageLoader = (url1, dir = process.cwd()) => {
   const nameHtml = getFileName(url1);
@@ -50,9 +57,8 @@ const pageLoader = (url1, dir = process.cwd()) => {
   const { hostname } = parseUrl;
   const hostName = hostname.replace(/[^a-z0-9]/gm, '-');
 
-  let imgUrls;
-  let imgName;
-  let images;
+  let imgNames;
+
   return axios.get(url1, {
     responseType: 'arraybuffer',
   })
@@ -60,37 +66,18 @@ const pageLoader = (url1, dir = process.cwd()) => {
     .then(() => fsp.access(fullDirPath))
     .catch(() => fsp.mkdir(fullDirPath))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
-    .then((file) => getImgLink(file, url1))
+    .then((file) => downloadResources(file, url1, fullDirPath)) // получаю массив ссылок на картинки
     .then((imgData) => {
-      imgUrls = imgData;
-      // console.log('imgUrl', imgUrls); //
+      imgNames = imgData;
+      // console.log(imgNames);
     })
-    .then(() => getImgName(imgUrls))
-    .then((newName) => {
-      imgName = newName;
-      // console.log('imgName', imgName); //
-    })
-    .then(() => {
-      const promises = imgUrls.map((imgUrl) => axios.get(imgUrl, {
-        responseType: 'arraybuffer',
-      }));
-      return Promise.all(promises);
-    })
-    .then((imgResponse) => imgResponse.map((resp) => resp.data))
-    .then((content) => {
-      images = content;
-    })
-    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[0]}`), images[0]))
-    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[1]}`), images[1]))
-    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[2]}`), images[2]))
-    .then(() => fsp.writeFile(path.join(fullDirPath, `${hostName}${imgName[3]}`), images[3]))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
     .then((file) => {
       const $ = cheerio.load(file);
       $('img').each((_index, el) => {
         const names = [];
         let i = 0;
-        const elem = $(el).attr('src', path.join(dirName, hostName, imgName[i]));
+        const elem = $(el).attr('src', path.join(dirName, `${hostName}${imgNames[i]}`));
         names.push(elem);
         i += 1;
         return names;
