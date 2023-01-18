@@ -6,6 +6,7 @@ import nock from 'nock';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fsp from 'fs/promises';
+import prettier from 'prettier';
 import pageLoader from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,7 +46,10 @@ test('2) Should load page', async () => {
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
   const fileName = await fsp.readdir(tmpDir);
   const page = await fsp.readFile(join(tmpDir, fileName[0]), 'utf-8');
-  expect(page).toEqual(afterHtml);
+  const formatedPage = prettier.format(page, { parser: 'html' });
+  const formatedfixture = prettier.format(afterHtml, { parser: 'html' });
+
+  expect(formatedPage).toEqual(formatedfixture);
 });
 
 test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
