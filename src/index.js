@@ -33,6 +33,7 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
   mapping.map(({ tag, attribute }) => $(tag).each((_index, el) => {
     const elem = $(el).attr(attribute);
     // console.log('elem', elem); //
+
     const url = new URL(elem, originUrl);
     const { href, origin } = url;
 
