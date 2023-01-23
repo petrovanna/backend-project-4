@@ -30,7 +30,7 @@ const mapping = [
 const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
   const $ = cheerio.load(html);
 
-  mapping.map(({ tag, attribute }) => $(tag).each((_index, el) => {
+  const promises = mapping.map(({ tag, attribute }) => $(tag).each((_index, el) => {
     const elem = $(el).attr(attribute);
     // console.log('elem', elem); //
 
@@ -39,6 +39,7 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
 
     if (origin === originUrl && elem !== undefined) {
       const newName = getFileName(elem, originUrl);
+
       return axios.get(href, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(path.join(dirPath, newName), response.data))
         .then(() => {
@@ -49,6 +50,9 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
     }
     return null;
   }));
+
+  const promise = Promise.all(promises);
+  return promise;
 };
 
 const pageLoader = (url1, dir = process.cwd()) => {
