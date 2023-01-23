@@ -75,9 +75,9 @@ test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
 });
 
 test('4) Should load img', async () => {
-  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
-  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
   nock('https://ru.hexlet.io').get('/assets/professions/nodejs.png').reply(200, expectedImage);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
   nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, beforeHTML);
   nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, beforeHTML);
 
@@ -85,10 +85,11 @@ test('4) Should load img', async () => {
   const dirName = await fsp.readdir(tmpDir);
   console.log('dirname:', dirName);
 
-  const imgName = await fsp.readdir(join(tmpDir, 'ru-hexlet-io-courses_files'));
+  const imgName = await fsp.readdir(join(tmpDir, dirName[1]));
   console.log('imgName:', imgName);
 
-  const img = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png'));
+  const img = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files', 'ru-hexlet-io-assets-professions-nodejs.png'), 'utf-8');
+  console.log('img', img);
 
   expect(img).toEqual(expectedImage);
 });
