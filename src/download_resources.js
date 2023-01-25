@@ -20,21 +20,25 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
     const url = new URL(elem, originUrl);
     const { href, origin } = url;
 
+    let promise;
+
     if (origin === originUrl && elem !== undefined) {
       const newName = getFileName(elem, originUrl);
 
-      return axios.get(href, { responseType: 'arraybuffer' })
+      promise = axios.get(href, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(path.join(dirPath, newName), response.data))
         .then(() => {
           $(el).attr(attribute, path.join(dirN, newName));
           const newFile = $.html();
           return fsp.writeFile(fullPath, newFile);
         });
+    } else {
+      return null;
     }
-    return null;
+
+    return promise;
   }));
 
-  const promise = Promise.all(promises);
-  return promise;
+  return Promise.all(promises);
 };
 export default downloadResources;
