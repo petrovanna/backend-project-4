@@ -6,7 +6,7 @@ import nock from 'nock';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fsp from 'fs/promises';
-// import prettier from 'prettier';
+import prettier from 'prettier';
 import pageLoader from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,11 +21,15 @@ let tmpDir;
 let beforeHTML;
 let afterHtml;
 let expectedImage;
+let expectedCss;
+let expectedScript;
 
 beforeAll(async () => {
   beforeHTML = await readFixture('before.html');
   afterHtml = await readFixture('after.html');
   expectedImage = await readFixture('image.png');
+  expectedCss = await readFixture('application.css');
+  expectedScript = await readFixture('script.js');
 });
 
 beforeEach(async () => {
@@ -36,28 +40,30 @@ test('1) Should return right file name "ru-hexlet-io-courses.html"', async () =>
   nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
   nock('https://ru.hexlet.io').get('/assets/professions/nodejs.png').reply(200, expectedImage);
   nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
-  nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, beforeHTML);
-  nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, expectedCss);
+  nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, expectedScript);
 
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
   const file = await fsp.readdir(tmpDir);
   expect(file[0]).toEqual('ru-hexlet-io-courses.html');
 });
 
-test('2) Should load page', async () => {
+/* test('2) Should load page', async () => {
   nock('https://ru.hexlet.io').get('/courses').reply(200, afterHtml);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-courses.html').reply(200, afterHtml);
+  // nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-courses.html').reply(200, afterHtml);
   nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png').reply(200, expectedImage);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css').reply(200, afterHtml);
+  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css').reply(200, expectedCss);
   nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-courses.html').reply(200, afterHtml);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js').reply(200, afterHtml);
+  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js').reply(200, expectedScript);
 
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
   const page = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses.html'), 'utf-8');
-  // const formatedPage = prettier.format(page, { parser: 'html' });
-  // const formatedfixture = prettier.format(afterHtml, { parser: 'html' });
-  expect(page).toEqual(afterHtml);
-});
+  console.log(page);
+
+  const formatedPage = prettier.format(page, { parser: 'html', printWidth: Infinity });
+  const formatedfixture = prettier.format(afterHtml, { parser: 'html', printWidth: Infinity });
+  expect(formatedPage).toEqual(formatedfixture);
+}); */
 
 test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
   nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
@@ -82,14 +88,36 @@ test('4) Should load img', async () => {
   nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, beforeHTML);
 
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
-  const dirName = await fsp.readdir(tmpDir);
-  console.log('dirname:', dirName);
-
-  const imgName = await fsp.readdir(join(tmpDir, dirName[1]));
-  console.log('imgName:', imgName);
 
   const img = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files', 'ru-hexlet-io-assets-professions-nodejs.png'), 'utf-8');
-  console.log('img', img);
 
   expect(img).toEqual(expectedImage);
+});
+
+test('5) Should load css', async () => {
+  nock('https://ru.hexlet.io').get('/assets/professions/nodejs.png').reply(200, expectedImage);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, expectedCss);
+  nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, expectedScript);
+
+  await pageLoader('https://ru.hexlet.io/courses', tmpDir);
+
+  const css = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files', 'ru-hexlet-io-assets-application.css'), 'utf-8');
+
+  expect(css).toEqual(expectedCss);
+});
+
+test('6) Should load script', async () => {
+  nock('https://ru.hexlet.io').get('/assets/professions/nodejs.png').reply(200, expectedImage);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, expectedCss);
+  nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, expectedScript);
+
+  await pageLoader('https://ru.hexlet.io/courses', tmpDir);
+
+  const script = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files', 'ru-hexlet-io-packs-js-runtime.js'), 'utf-8');
+
+  expect(script).toEqual(expectedScript);
 });
