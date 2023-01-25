@@ -12,33 +12,37 @@ const mapping = [
 
 const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
   const $ = cheerio.load(html);
+  const promises = [];
 
-  const promises = mapping.map(({ tag, attribute }) => $(tag).each((_index, el) => {
+  mapping.forEach(({ tag, attribute }) => $(tag).each((_index, el) => {
     const elem = $(el).attr(attribute);
-    // console.log('elem', elem); //
 
     const url = new URL(elem, originUrl);
     const { href, origin } = url;
 
-    let promise;
-
     if (origin === originUrl && elem !== undefined) {
       const newName = getFileName(elem, originUrl);
+      console.log('elem:', elem); //
+      console.log('originUrl:', originUrl); //
+      console.log('newName:', newName); //
+      // console.log('writefile1:', path.join(dirPath, newName)); //
+      // console.log('attribute:', path.join(dirN, newName)); //
+      // console.log('writefile2:', fullPath); //
 
-      promise = axios.get(href, { responseType: 'arraybuffer' })
+      const promise = axios.get(href, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(path.join(dirPath, newName), response.data))
         .then(() => {
           $(el).attr(attribute, path.join(dirN, newName));
           const newFile = $.html();
           return fsp.writeFile(fullPath, newFile);
         });
-    } else {
-      return null;
+      promises.push(promise);
     }
 
-    return promise;
+    return null;
   }));
 
   return Promise.all(promises);
 };
+
 export default downloadResources;
