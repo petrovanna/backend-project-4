@@ -22,12 +22,6 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
 
     if (origin === originUrl && elem !== undefined) {
       const newName = getFileName(elem, originUrl);
-      console.log('elem:', elem); //
-      console.log('originUrl:', originUrl); //
-      console.log('newName:', newName); //
-      // console.log('writefile1:', path.join(dirPath, newName)); //
-      // console.log('attribute:', path.join(dirN, newName)); //
-      // console.log('writefile2:', fullPath); //
 
       const promise = axios.get(href, { responseType: 'arraybuffer' })
         .then((response) => fsp.writeFile(path.join(dirPath, newName), response.data))
