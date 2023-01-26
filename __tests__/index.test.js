@@ -48,22 +48,21 @@ test('1) Should return right file name "ru-hexlet-io-courses.html"', async () =>
   expect(file[0]).toEqual('ru-hexlet-io-courses.html');
 });
 
-/* test('2) Should load page', async () => {
-  nock('https://ru.hexlet.io').get('/courses').reply(200, afterHtml);
-  // nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-courses.html').reply(200, afterHtml);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png').reply(200, expectedImage);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css').reply(200, expectedCss);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-courses.html').reply(200, afterHtml);
-  nock('https://ru.hexlet.io').get('/ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js').reply(200, expectedScript);
+test('2) Should load page', async () => {
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/assets/professions/nodejs.png').reply(200, expectedImage);
+  nock('https://ru.hexlet.io').get('/assets/application.css').reply(200, expectedCss);
+  nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
+  nock('https://ru.hexlet.io').get('/packs/js/runtime.js').reply(200, expectedScript);
 
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
   const page = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses.html'), 'utf-8');
-  console.log(page);
 
   const formatedPage = prettier.format(page, { parser: 'html', printWidth: Infinity });
-  const formatedfixture = prettier.format(afterHtml, { parser: 'html', printWidth: Infinity });
-  expect(formatedPage).toEqual(formatedfixture);
-}); */
+  const formatedAfterHtml = prettier.format(afterHtml, { parser: 'html', printWidth: Infinity });
+
+  expect(formatedPage).toEqual(formatedAfterHtml);
+});
 
 test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
   nock('https://ru.hexlet.io').get('/courses').reply(200, beforeHTML);
