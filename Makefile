@@ -5,4 +5,6 @@ publish:
 lint:
 	npx eslint .
 test:
-	npx jest
+	DEBUG=page-loader npx jest
+test-watch:
+	DEBUG=page-loader npx jest --watch
