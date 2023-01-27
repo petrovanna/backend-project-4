@@ -1,7 +1,10 @@
 import axios from 'axios';
+import 'axios-debug-log';
 import fsp from 'fs/promises';
 import path from 'path';
 import cheerio from 'cheerio';
+import debug from 'debug';
+
 import getFileName from './get_file_name.js';
 
 const mapping = [
@@ -9,6 +12,8 @@ const mapping = [
   { tag: 'link', attribute: 'href' },
   { tag: 'script', attribute: 'src' },
 ];
+
+const log = debug('page-loader');
 
 const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
   const $ = cheerio.load(html);
@@ -24,8 +29,14 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
       const newName = getFileName(elem, originUrl);
 
       const promise = axios.get(href, { responseType: 'arraybuffer' })
-        .then((response) => fsp.writeFile(path.join(dirPath, newName), response.data))
+        .then((response) => {
+          log(`Loading file url: ${href}`);
+
+          return fsp.writeFile(path.join(dirPath, newName), response.data);
+        })
         .then(() => {
+          log(`Loading file path: ${path.join(dirN, newName)}`);
+
           $(el).attr(attribute, path.join(dirN, newName));
           const newFile = $.html();
           return fsp.writeFile(fullPath, newFile);

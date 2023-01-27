@@ -2,13 +2,17 @@ import 'axios-debug-log';
 import axios from 'axios';
 import fsp from 'fs/promises';
 import path from 'path';
+import debug from 'debug';
 
 import getFileName from './get_file_name.js';
 import downloadResources from './download_resources.js';
 
-// const log = debug('page-loader');
+const log = debug('page-loader');
 
 const pageLoader = (url1, dir = process.cwd()) => {
+  log(`URL: ${url1}`);
+  log(`Download directory: ${dir}`);
+
   const parseUrl = new URL(url1, url1);
   const { origin } = parseUrl;
 
@@ -33,5 +37,3 @@ export default pageLoader;
 // page-loader --output /var/tmp https://ru.hexlet.io/courses
 // page-loader --output /var/tmp https://page-loader.hexlet.repl.co/
 // page-loader https://ru.hexlet.io/courses
-// https://cdn2.hexlet.io/assets/logo_ru-495f05850e0095ea722a2b583565d492719579c02b0ce61d924e4f895fabf781.svg
-// https://cdn2.hexlet.io/assets/at_a_laptop-8c6e59267f91a6bf13bae0e5c0f7e1f36accc440b8d760bca08ab244e2b8bdbf.png
