@@ -93,9 +93,8 @@ test('6) Should load script', async () => {
   expect(script).toEqual(expectedScript);
 });
 
-test('7) Girectory is not exist', async () => {
+test('7) Directory is not exist', async () => {
   const notExistedDir = join(os.tmpdir(), '/not_existed_dir');
-  console.log(notExistedDir);
 
   await expect(pageLoader('https://ru.hexlet.io/courses', notExistedDir)).rejects.toThrow('ENOENT');
 });
@@ -105,7 +104,7 @@ test('8) Access error', async () => {
 });
 
 test('9) 404', async () => {
-  nock('https://invalid').get('/url').replyWithError('404 Not Found');
+  nock('https://hexlet.ru').get('/not_found_page').reply(404);
 
-  await expect(pageLoader('https://invalid/url', tmpDir)).rejects.toThrow();
+  await expect(pageLoader('https://hexlet.ru/not_found_page', tmpDir)).rejects.toThrow('Request failed with status code 404');
 });
