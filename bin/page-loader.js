@@ -11,7 +11,11 @@ program
   .option('-o, --output [dir]', 'output dir', currentDir)
   .argument('<url>')
   .action((url) => {
-    pageLoader(url, program.opts().output);
+    pageLoader(url, program.opts().output)
+      .catch((error) => {
+        console.error(error.message);
+        process.exit(1);
+      });
   });
 
 program.parse();
