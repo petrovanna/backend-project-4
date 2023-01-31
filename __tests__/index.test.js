@@ -45,8 +45,10 @@ beforeEach(async () => {
 test('1) Should return right file name "ru-hexlet-io-courses.html"', async () => {
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
 
-  const file = await fsp.readdir(tmpDir);
-  expect(file[0]).toEqual('ru-hexlet-io-courses.html');
+  const fileNamesArray = await fsp.readdir(tmpDir);
+  const htmlFileName = fileNamesArray[0];
+
+  expect(htmlFileName).toEqual('ru-hexlet-io-courses.html');
 });
 
 test('2) Should load page and change links', async () => {
@@ -65,15 +67,15 @@ test('3) Should create dir: "ru-hexlet-io-courses_files"', async () => {
 
   const fullDirPath = join(tmpDir, 'ru-hexlet-io-courses_files');
   const stats = await fsp.stat(fullDirPath);
-  const file = await fsp.readdir(tmpDir);
+  const fileNamesArray = await fsp.readdir(tmpDir);
+  const directoryName = fileNamesArray[1];
 
   expect(stats.isDirectory()).toBe(true);
-  expect(file[1]).toEqual('ru-hexlet-io-courses_files');
+  expect(directoryName).toEqual('ru-hexlet-io-courses_files');
 });
 
 test('4) Should load img', async () => {
   await pageLoader('https://ru.hexlet.io/courses', tmpDir);
-
   const img = await fsp.readFile(join(tmpDir, 'ru-hexlet-io-courses_files', 'ru-hexlet-io-assets-professions-nodejs.png'), 'utf-8');
 
   expect(img).toEqual(expectedImage);
@@ -93,17 +95,17 @@ test('6) Should load script', async () => {
   expect(script).toEqual(expectedScript);
 });
 
-test('7) Directory is not exist', async () => {
+test('7) Err: Directory is not exist', async () => {
   const notExistedDir = join(os.tmpdir(), '/not_existed_dir');
 
   await expect(pageLoader('https://ru.hexlet.io/courses', notExistedDir)).rejects.toThrow('ENOENT');
 });
 
-test('8) Access error', async () => {
+test('8) Err: Access error', async () => {
   await expect(pageLoader('https://ru.hexlet.io/courses', '/sys')).rejects.toThrow('EACCES');
 });
 
-test('9) 404', async () => {
+test('9) Err: 404', async () => {
   nock('https://hexlet.ru').get('/not_found_page').reply(404);
 
   await expect(pageLoader('https://hexlet.ru/not_found_page', tmpDir)).rejects.toThrow('Request failed with status code 404');
