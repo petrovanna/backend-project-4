@@ -4,7 +4,7 @@
 ### Code Coverage:
 [![Maintainability](https://api.codeclimate.com/v1/badges/ceac07de15d77be39f7f/maintainability)](https://codeclimate.com/github/petrovanna/backend-project-4/maintainability)
 
-[![Test Coverage](https://api.codeclimate.com/v1/badges/0995670fc75577b98ce4/test_coverage)](https://codeclimate.com/github/petrovanna/backend-project-4/test_coverage)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/ceac07de15d77be39f7f/test_coverage)](https://codeclimate.com/github/petrovanna/backend-project-4/test_coverage)
 
 ### GitHub Actions:
 [![Linter/Tests](https://github.com/petrovanna/backend-project-4/workflows/Linter/Tests/badge.svg)](https://github.com/petrovanna/backend-project-4/actions/workflows/lint.yml)
