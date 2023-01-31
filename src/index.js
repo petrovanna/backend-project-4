@@ -25,7 +25,6 @@ const pageLoader = (url1, dir = process.cwd()) => {
     responseType: 'arraybuffer',
   })
     .then((response) => fsp.writeFile(fullHtmlPath, response.data))
-    // .then(() => fsp.mkdir(fullDirPath))
     .then(() => fsp.access(fullDirPath)
       .catch(() => fsp.mkdir(fullDirPath)))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
@@ -33,11 +32,3 @@ const pageLoader = (url1, dir = process.cwd()) => {
     .then(() => console.log(`Page was successfully downloaded into '${fullHtmlPath}'`));
 };
 export default pageLoader;
-
-// page-loader --output /var/tmp https://ru.hexlet.io/courses
-// page-loader --output /var/tmp https://page-loader.hexlet.repl.co/
-// page-loader https://ru.hexlet.io/courses
-
-// page-loader --output /var/tmp https://hexlet.ru/not_found_page
-// page-loader --output /sys https://page-loader.hexlet.repl.co/
-// page-loader --output /notExist https://page-loader.hexlet.repl.co/

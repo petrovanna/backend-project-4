@@ -40,8 +40,8 @@ const downloadResources = (html, dirPath, dirN, fullPath, originUrl) => {
     return null;
   }));
   const tasks = new Listr(promises, { concurrent: true });
+
   return tasks.run();
-  // return Promise.all(promises);
 };
 
 export default downloadResources;
