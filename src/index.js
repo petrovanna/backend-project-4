@@ -28,7 +28,6 @@ const pageLoader = (url1, dir = process.cwd()) => {
     .then(() => fsp.access(fullDirPath)
       .catch(() => fsp.mkdir(fullDirPath)))
     .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
-    .then((file) => downloadResources(file, fullDirPath, dirName, fullHtmlPath, origin))
-    .then(() => console.log(`Page was successfully downloaded into '${fullHtmlPath}'`));
+    .then((file) => downloadResources(file, fullDirPath, dirName, fullHtmlPath, origin));
 };
 export default pageLoader;

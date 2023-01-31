@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
+import getFullFilePath from '../src/get_full_file_path.js';
 import pageLoader from '../src/index.js';
 
 const currentDir = process.cwd();
@@ -12,6 +13,7 @@ program
   .argument('<url>')
   .action((url) => {
     pageLoader(url, program.opts().output)
+      .then(() => console.log(`Page was successfully downloaded into '${getFullFilePath(url, program.opts().output)}'`))
       .catch((error) => {
         console.error(error.message);
         process.exit(1);
