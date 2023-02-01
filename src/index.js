@@ -24,10 +24,22 @@ const pageLoader = (url1, dir = process.cwd()) => {
   return axios.get(url1, {
     responseType: 'arraybuffer',
   })
-    .then((response) => fsp.writeFile(fullHtmlPath, response.data))
-    .then(() => fsp.access(fullDirPath)
-      .catch(() => fsp.mkdir(fullDirPath)))
-    .then(() => fsp.readFile(fullHtmlPath, 'utf-8'))
-    .then((file) => downloadResources(file, fullDirPath, dirName, fullHtmlPath, origin));
+    .then((response) => {
+      log('Write downloaded data to file');
+      return fsp.writeFile(fullHtmlPath, response.data);
+    })
+    .then(() => {
+      log('Create dir if not exist');
+      return fsp.access(fullDirPath)
+        .catch(() => fsp.mkdir(fullDirPath));
+    })
+    .then(() => {
+      log('Read downloaded file');
+      return fsp.readFile(fullHtmlPath, 'utf-8');
+    })
+    .then((file) => {
+      log('Download resources');
+      return downloadResources(file, fullDirPath, dirName, fullHtmlPath, origin);
+    });
 };
 export default pageLoader;
